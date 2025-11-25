@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Clinique Frany · Cartes d'assurance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="top-bar">
+        <div>
+          <p class="eyebrow">Fikasso Security · Proof of concept</p>
+          <h1>Clinique Frany — Gestion des cartes d'assurance</h1>
+        </div>
+        <div class="status-pills">
+          <span class="pill success">Horodatage serveur actif</span>
+          <span class="pill warning">Audit trail inviolable</span>
+          <span class="pill info">HTTPS requis</span>
+        </div>
+      </header>
+
+      <nav class="module-tabs" aria-label="Navigation modules">
+        <button class="tab-btn active" data-tab="dashboard">Tableau de bord</button>
+        <button class="tab-btn" data-tab="patients">Patients</button>
+        <button class="tab-btn" data-tab="cards">Cartes</button>
+        <button class="tab-btn" data-tab="usages">Utilisations</button>
+        <button class="tab-btn" data-tab="audit">Journal & Permissions</button>
+      </nav>
+
+      <main class="module-container">
+        <section class="module-view active" data-section="dashboard">
+          <div class="split-grid">
+            <article class="panel">
+              <header>
+                <h2>Vue générale</h2>
+                <p>Statistiques consolidées côté serveur</p>
+              </header>
+              <div class="stat-grid">
+                <div class="stat-card">
+                  <p>Total cartes enregistrées</p>
+                  <strong id="statCards">0</strong>
+                  <small>Objectif Q4 : 2 500</small>
+                </div>
+                <div class="stat-card">
+                  <p>Utilisations (7 derniers jours)</p>
+                  <strong id="statUsageWeek">0</strong>
+                  <small>Automatiquement horodatées</small>
+                </div>
+                <div class="stat-card">
+                  <p>Cartes expirées</p>
+                  <strong id="statExpired">0</strong>
+                  <small>Alerte temps réel</small>
+                </div>
+                <div class="stat-card">
+                  <p>Actions auditées</p>
+                  <strong id="statAudit">0</strong>
+                  <small>Journal non éditable</small>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel">
+              <header>
+                <h2>Performance des caissiers</h2>
+                <p>Répartition par utilisateur connecté</p>
+              </header>
+              <div id="staffMetrics" class="list-metric"></div>
+            </article>
+          </div>
+
+          <article class="panel">
+            <header>
+              <h2>Alertes instantanées</h2>
+              <p>Basées sur les dates d'expiration et les règles d'usage</p>
+            </header>
+            <ul id="alertList" class="alert-list"></ul>
+          </article>
+
+          <article class="panel">
+            <header>
+              <h2>Timeline des utilisations</h2>
+              <p>Chaque entrée contient la photo horodatée et l'utilisateur</p>
+            </header>
+            <ul id="usageTimeline" class="timeline"></ul>
+          </article>
+        </section>
+
+        <section class="module-view" data-section="patients">
+          <article class="panel">
+            <header>
+              <h2>Module Patient</h2>
+              <p>Création et recherche rapide</p>
+            </header>
+            <form id="patientForm" class="grid-form">
+              <label>
+                Nom *
+                <input required name="lastName" placeholder="Dupont" />
+              </label>
+              <label>
+                Prénom *
+                <input required name="firstName" placeholder="Awa" />
+              </label>
+              <label>
+                Date de naissance *
+                <input required name="birthDate" type="date" />
+              </label>
+              <label>
+                Sexe *
+                <select required name="gender">
+                  <option value="">Choisir…</option>
+                  <option value="F">Féminin</option>
+                  <option value="M">Masculin</option>
+                </select>
+              </label>
+              <label>
+                Téléphone *
+                <input required name="phone" type="tel" placeholder="+223 66 00 00 00" />
+              </label>
+              <label>
+                Adresse
+                <input name="address" placeholder="Quartier, ville" />
+              </label>
+              <button type="submit" class="primary-btn">Enregistrer le patient</button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <header>
+              <h2>Recherche rapide</h2>
+              <p>Filtre par nom, téléphone ou ID patient</p>
+            </header>
+            <input
+              id="patientSearch"
+              class="search-input"
+              placeholder="Rechercher Awa, +223… ou P-2024-003"
+            />
+            <ul id="patientList" class="item-list"></ul>
+          </article>
+        </section>
+
+        <section class="module-view" data-section="cards">
+          <article class="panel">
+            <header>
+              <h2>Cartes d'assurance</h2>
+              <p>Enregistrement avec capture recto/verso et template OCR</p>
+            </header>
+            <form id="cardForm" class="grid-form">
+              <label>
+                Patient *
+                <select required name="patientId" id="cardPatientSelect"></select>
+              </label>
+              <label>
+                Assureur *
+                <select required name="insurer"></select>
+              </label>
+              <label>
+                Type d'assurance *
+                <select required name="planType"></select>
+              </label>
+              <label>
+                Template OCR *
+                <select required name="templateId" id="templateSelect"></select>
+              </label>
+              <label>
+                Numéro de police *
+                <input required name="policyNumber" placeholder="CNPS-123-456" />
+              </label>
+              <label>
+                Date de début
+                <input type="date" name="startDate" />
+              </label>
+              <label>
+                Date d'expiration
+                <input type="date" name="endDate" />
+              </label>
+              <label class="file-field">
+                Photo recto (obligatoire)
+                <input required name="frontPhoto" type="file" accept="image/*" capture="environment" />
+              </label>
+              <label class="file-field">
+                Photo verso
+                <input name="backPhoto" type="file" accept="image/*" capture="environment" />
+              </label>
+              <button type="submit" class="primary-btn">Ajouter la carte</button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <header>
+              <h2>Cartes actives</h2>
+              <p>Journal temps réel des cartes sécurisées</p>
+            </header>
+            <ul id="cardList" class="card-grid"></ul>
+          </article>
+        </section>
+
+        <section class="module-view" data-section="usages">
+          <article class="panel">
+            <header>
+              <h2>Nouvelle utilisation</h2>
+              <p>Photo horodatée obligatoire à chaque passage</p>
+            </header>
+            <form id="usageForm" class="grid-form">
+              <label>
+                Patient *
+                <select required name="patientId" id="usagePatientSelect"></select>
+              </label>
+              <label>
+                Carte *
+                <select required name="cardId" id="usageCardSelect"></select>
+              </label>
+              <label class="file-field">
+                Photo du jour *
+                <input required name="usagePhoto" type="file" accept="image/*" capture="environment" />
+              </label>
+              <fieldset>
+                <legend>Contrôles automatiques</legend>
+                <label class="checkbox">
+                  <input type="checkbox" name="consistency" checked disabled />
+                  Vérification numéro carte
+                </label>
+                <label class="checkbox">
+                  <input type="checkbox" name="expiry" checked disabled />
+                  Alerte carte expirée
+                </label>
+              </fieldset>
+              <button type="submit" class="primary-btn">Horodater l'utilisation</button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <header>
+              <h2>Historique complet</h2>
+              <p>Chaque ligne lie patient, carte et caissier</p>
+            </header>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date & heure</th>
+                  <th>Patient</th>
+                  <th>Carte</th>
+                  <th>Caissier</th>
+                  <th>Photo</th>
+                </tr>
+              </thead>
+              <tbody id="usageTableBody"></tbody>
+            </table>
+          </article>
+        </section>
+
+        <section class="module-view" data-section="audit">
+          <article class="panel">
+            <header>
+              <h2>Permissions & rôles</h2>
+              <p>Modèle RBAC minimal</p>
+            </header>
+            <ul class="role-list">
+              <li>
+                <strong>Admin</strong>
+                <span>Gestion des utilisateurs, accès complet, export</span>
+              </li>
+              <li>
+                <strong>Superviseur</strong>
+                <span>Lecture + audit + export</span>
+              </li>
+              <li>
+                <strong>Caissier</strong>
+                <span>Patients, cartes, utilisations</span>
+              </li>
+              <li>
+                <strong>Lecture seule</strong>
+                <span>Personnel médical, consultation uniquement</span>
+              </li>
+            </ul>
+          </article>
+
+          <article class="panel">
+            <header>
+              <h2>Journal d'audit (non modifiable)</h2>
+              <p>Chaque action sensible est signée côté serveur</p>
+            </header>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Horodatage</th>
+                  <th>Utilisateur</th>
+                  <th>Action</th>
+                  <th>Objet</th>
+                  <th>IP</th>
+                </tr>
+              </thead>
+              <tbody id="auditTableBody"></tbody>
+            </table>
+          </article>
+        </section>
+      </main>
+
+      <footer class="app-footer">
+        <p>Version 1.0 · Prototype front-end (sans backend)</p>
+        <p>Horodatage simulé côté client pour la démonstration.</p>
+      </footer>
+    </div>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
+
