@@ -157,16 +157,51 @@ h1 {
   border-radius: 16px;
   padding: 16px;
   background: #fefeff;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.stat-card.animated {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.stat-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  opacity: 0.8;
 }
 
 .stat-card strong {
   display: block;
   font-size: 2rem;
   margin: 4px 0;
+  font-weight: 700;
+  background: linear-gradient(120deg, var(--primary), #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .stat-card small {
   color: var(--muted);
+  font-size: 0.85rem;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .list-metric {
@@ -264,6 +299,20 @@ h1 {
   flex-direction: column;
   gap: 6px;
   font-size: 0.95rem;
+}
+
+.form-section {
+  border: 2px solid var(--outline);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background: #fafbfc;
+}
+
+.form-section legend {
+  font-weight: 600;
+  color: var(--primary);
+  padding: 0 8px;
 }
 
 .grid-form input,
@@ -401,12 +450,23 @@ h1 {
   font-size: 0.85rem;
 }
 
+#usageChart,
+#insurerChart,
+#coverageChart {
+  max-height: 300px;
+  margin-top: 16px;
+}
+
 @media (max-width: 720px) {
   .top-bar {
     flex-direction: column;
   }
 
   .grid-form {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-grid {
     grid-template-columns: 1fr;
   }
 }

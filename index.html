@@ -10,6 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -28,50 +29,73 @@
 
       <nav class="module-tabs" aria-label="Navigation modules">
         <button class="tab-btn active" data-tab="dashboard">Tableau de bord</button>
-        <button class="tab-btn" data-tab="patients">Patients</button>
-        <button class="tab-btn" data-tab="cards">Cartes</button>
-        <button class="tab-btn" data-tab="usages">Utilisations</button>
+        <button class="tab-btn" data-tab="register">Enregistrer patient</button>
+        <button class="tab-btn" data-tab="reports">Rapports</button>
         <button class="tab-btn" data-tab="audit">Journal & Permissions</button>
       </nav>
 
       <main class="module-container">
         <section class="module-view active" data-section="dashboard">
+          <div class="stat-grid">
+            <div class="stat-card animated">
+              <div class="stat-icon">📊</div>
+              <p>Total cartes enregistrées</p>
+              <strong id="statCards">0</strong>
+              <small>Objectif Q4 : 2 500</small>
+            </div>
+            <div class="stat-card animated">
+              <div class="stat-icon">📅</div>
+              <p>Utilisations (7 derniers jours)</p>
+              <strong id="statUsageWeek">0</strong>
+              <small>Automatiquement horodatées</small>
+            </div>
+            <div class="stat-card animated">
+              <div class="stat-icon">⚠️</div>
+              <p>Cartes expirées</p>
+              <strong id="statExpired">0</strong>
+              <small>Alerte temps réel</small>
+            </div>
+            <div class="stat-card animated">
+              <div class="stat-icon">🔒</div>
+              <p>Actions auditées</p>
+              <strong id="statAudit">0</strong>
+              <small>Journal non éditable</small>
+            </div>
+          </div>
+
           <div class="split-grid">
             <article class="panel">
               <header>
-                <h2>Vue générale</h2>
-                <p>Statistiques consolidées côté serveur</p>
+                <h2>Évolution des utilisations</h2>
+                <p>Graphique sur 30 derniers jours</p>
               </header>
-              <div class="stat-grid">
-                <div class="stat-card">
-                  <p>Total cartes enregistrées</p>
-                  <strong id="statCards">0</strong>
-                  <small>Objectif Q4 : 2 500</small>
-                </div>
-                <div class="stat-card">
-                  <p>Utilisations (7 derniers jours)</p>
-                  <strong id="statUsageWeek">0</strong>
-                  <small>Automatiquement horodatées</small>
-                </div>
-                <div class="stat-card">
-                  <p>Cartes expirées</p>
-                  <strong id="statExpired">0</strong>
-                  <small>Alerte temps réel</small>
-                </div>
-                <div class="stat-card">
-                  <p>Actions auditées</p>
-                  <strong id="statAudit">0</strong>
-                  <small>Journal non éditable</small>
-                </div>
-              </div>
+              <canvas id="usageChart"></canvas>
             </article>
 
+            <article class="panel">
+              <header>
+                <h2>Répartition par assureur</h2>
+                <p>Distribution des cartes actives</p>
+              </header>
+              <canvas id="insurerChart"></canvas>
+            </article>
+          </div>
+
+          <div class="split-grid">
             <article class="panel">
               <header>
                 <h2>Performance des caissiers</h2>
                 <p>Répartition par utilisateur connecté</p>
               </header>
               <div id="staffMetrics" class="list-metric"></div>
+            </article>
+
+            <article class="panel">
+              <header>
+                <h2>Types de couverture</h2>
+                <p>Répartition complète vs partielle</p>
+              </header>
+              <canvas id="coverageChart"></canvas>
             </article>
           </div>
 
@@ -82,52 +106,91 @@
             </header>
             <ul id="alertList" class="alert-list"></ul>
           </article>
-
-          <article class="panel">
-            <header>
-              <h2>Timeline des utilisations</h2>
-              <p>Chaque entrée contient la photo horodatée et l'utilisateur</p>
-            </header>
-            <ul id="usageTimeline" class="timeline"></ul>
-          </article>
         </section>
 
-        <section class="module-view" data-section="patients">
+        <section class="module-view" data-section="register">
           <article class="panel">
             <header>
-              <h2>Module Patient</h2>
-              <p>Création et recherche rapide</p>
+              <h2>Enregistrer un patient avec sa carte d'assurance</h2>
+              <p>Workflow complet : création patient + enregistrement carte</p>
             </header>
-            <form id="patientForm" class="grid-form">
-              <label>
-                Nom *
-                <input required name="lastName" placeholder="Dupont" />
-              </label>
-              <label>
-                Prénom *
-                <input required name="firstName" placeholder="Awa" />
-              </label>
-              <label>
-                Date de naissance *
-                <input required name="birthDate" type="date" />
-              </label>
-              <label>
-                Sexe *
-                <select required name="gender">
-                  <option value="">Choisir…</option>
-                  <option value="F">Féminin</option>
-                  <option value="M">Masculin</option>
-                </select>
-              </label>
-              <label>
-                Téléphone *
-                <input required name="phone" type="tel" placeholder="+223 66 00 00 00" />
-              </label>
-              <label>
-                Adresse
-                <input name="address" placeholder="Quartier, ville" />
-              </label>
-              <button type="submit" class="primary-btn">Enregistrer le patient</button>
+            <form id="registerForm" class="grid-form">
+              <fieldset class="form-section">
+                <legend>Informations patient</legend>
+                <label>
+                  Nom *
+                  <input required name="lastName" placeholder="Dupont" />
+                </label>
+                <label>
+                  Prénom *
+                  <input required name="firstName" placeholder="Awa" />
+                </label>
+                <label>
+                  Date de naissance *
+                  <input required name="birthDate" type="date" />
+                </label>
+                <label>
+                  Sexe *
+                  <select required name="gender">
+                    <option value="">Choisir…</option>
+                    <option value="F">Féminin</option>
+                    <option value="M">Masculin</option>
+                  </select>
+                </label>
+                <label>
+                  Téléphone *
+                  <input required name="phone" type="tel" placeholder="+223 66 00 00 00" />
+                </label>
+                <label>
+                  Adresse
+                  <input name="address" placeholder="Quartier, ville" />
+                </label>
+              </fieldset>
+
+              <fieldset class="form-section">
+                <legend>Informations carte d'assurance</legend>
+                <label>
+                  Assureur *
+                  <select required name="insurer" id="registerInsurerSelect"></select>
+                </label>
+                <label>
+                  Type d'assurance *
+                  <select required name="planType" id="registerPlanSelect"></select>
+                </label>
+                <label>
+                  Template OCR *
+                  <select required name="templateId" id="registerTemplateSelect"></select>
+                </label>
+                <label>
+                  Numéro de police *
+                  <input required name="policyNumber" placeholder="CNPS-123-456" />
+                </label>
+                <label>
+                  Date de début
+                  <input type="date" name="startDate" />
+                </label>
+                <label>
+                  Date d'expiration
+                  <input type="date" name="endDate" />
+                </label>
+                <label>
+                  Type de couverture *
+                  <select required name="coverageType">
+                    <option value="">Choisir…</option>
+                    <option value="complete">Complète</option>
+                    <option value="partielle">Partielle</option>
+                  </select>
+                </label>
+                <label class="file-field">
+                  Photo recto (obligatoire)
+                  <input required name="frontPhoto" type="file" accept="image/*" capture="environment" />
+                </label>
+                <label class="file-field">
+                  Photo verso
+                  <input name="backPhoto" type="file" accept="image/*" capture="environment" />
+                </label>
+              </fieldset>
+              <button type="submit" class="primary-btn">Enregistrer patient et carte</button>
             </form>
           </article>
 
@@ -143,54 +206,6 @@
             />
             <ul id="patientList" class="item-list"></ul>
           </article>
-        </section>
-
-        <section class="module-view" data-section="cards">
-          <article class="panel">
-            <header>
-              <h2>Cartes d'assurance</h2>
-              <p>Enregistrement avec capture recto/verso et template OCR</p>
-            </header>
-            <form id="cardForm" class="grid-form">
-              <label>
-                Patient *
-                <select required name="patientId" id="cardPatientSelect"></select>
-              </label>
-              <label>
-                Assureur *
-                <select required name="insurer"></select>
-              </label>
-              <label>
-                Type d'assurance *
-                <select required name="planType"></select>
-              </label>
-              <label>
-                Template OCR *
-                <select required name="templateId" id="templateSelect"></select>
-              </label>
-              <label>
-                Numéro de police *
-                <input required name="policyNumber" placeholder="CNPS-123-456" />
-              </label>
-              <label>
-                Date de début
-                <input type="date" name="startDate" />
-              </label>
-              <label>
-                Date d'expiration
-                <input type="date" name="endDate" />
-              </label>
-              <label class="file-field">
-                Photo recto (obligatoire)
-                <input required name="frontPhoto" type="file" accept="image/*" capture="environment" />
-              </label>
-              <label class="file-field">
-                Photo verso
-                <input name="backPhoto" type="file" accept="image/*" capture="environment" />
-              </label>
-              <button type="submit" class="primary-btn">Ajouter la carte</button>
-            </form>
-          </article>
 
           <article class="panel">
             <header>
@@ -201,56 +216,74 @@
           </article>
         </section>
 
-        <section class="module-view" data-section="usages">
+        <section class="module-view" data-section="reports">
           <article class="panel">
             <header>
-              <h2>Nouvelle utilisation</h2>
-              <p>Photo horodatée obligatoire à chaque passage</p>
+              <h2>Filtres de rapport</h2>
+              <p>Générer des rapports personnalisés selon vos critères</p>
             </header>
-            <form id="usageForm" class="grid-form">
+            <form id="reportFilters" class="grid-form">
               <label>
-                Patient *
-                <select required name="patientId" id="usagePatientSelect"></select>
+                Période
+                <select name="period" id="reportPeriod">
+                  <option value="7">7 derniers jours</option>
+                  <option value="30" selected>30 derniers jours</option>
+                  <option value="90">3 derniers mois</option>
+                  <option value="365">12 derniers mois</option>
+                  <option value="custom">Personnalisée</option>
+                </select>
+              </label>
+              <label id="dateFromLabel" style="display: none;">
+                Date de début
+                <input type="date" name="dateFrom" id="reportDateFrom" />
+              </label>
+              <label id="dateToLabel" style="display: none;">
+                Date de fin
+                <input type="date" name="dateTo" id="reportDateTo" />
               </label>
               <label>
-                Carte *
-                <select required name="cardId" id="usageCardSelect"></select>
+                Assureur
+                <select name="insurer" id="reportInsurer">
+                  <option value="">Tous les assureurs</option>
+                </select>
               </label>
-              <label class="file-field">
-                Photo du jour *
-                <input required name="usagePhoto" type="file" accept="image/*" capture="environment" />
+              <label>
+                Type de couverture
+                <select name="coverageType" id="reportCoverage">
+                  <option value="">Tous les types</option>
+                  <option value="complete">Couverture complète</option>
+                  <option value="partielle">Couverture partielle</option>
+                </select>
               </label>
-              <fieldset>
-                <legend>Contrôles automatiques</legend>
-                <label class="checkbox">
-                  <input type="checkbox" name="consistency" checked disabled />
-                  Vérification numéro carte
-                </label>
-                <label class="checkbox">
-                  <input type="checkbox" name="expiry" checked disabled />
-                  Alerte carte expirée
-                </label>
-              </fieldset>
-              <button type="submit" class="primary-btn">Horodater l'utilisation</button>
+              <label>
+                Type d'assurance
+                <select name="planType" id="reportPlanType">
+                  <option value="">Tous les plans</option>
+                </select>
+              </label>
+              <button type="submit" class="primary-btn">Générer le rapport</button>
             </form>
           </article>
 
           <article class="panel">
             <header>
-              <h2>Historique complet</h2>
-              <p>Chaque ligne lie patient, carte et caissier</p>
+              <h2>Résultats du rapport</h2>
+              <p id="reportSummary">Sélectionnez des filtres et générez un rapport</p>
             </header>
+            <div id="reportStats" class="stat-grid" style="margin-bottom: 24px;"></div>
             <table class="data-table">
               <thead>
                 <tr>
                   <th>Date & heure</th>
                   <th>Patient</th>
-                  <th>Carte</th>
+                  <th>Assureur</th>
+                  <th>Type de couverture</th>
+                  <th>Numéro carte</th>
                   <th>Caissier</th>
                   <th>Photo</th>
                 </tr>
               </thead>
-              <tbody id="usageTableBody"></tbody>
+              <tbody id="reportTableBody"></tbody>
             </table>
           </article>
         </section>
